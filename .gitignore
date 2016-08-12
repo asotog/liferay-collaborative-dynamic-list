@@ -20,6 +20,8 @@ hs_err_pid*
 /dist/
 build/
 /lib/*
+!/lib/atmosphere-runtime-2.1.1.jar
+!/lib/slf4j-api-1.6.1.jar
 !/lib/ant-contrib.jar
 !/lib/antelopetasks.jar
 !/lib/bcpg-jdk16.jar
