@@ -34,7 +34,9 @@ AUI.add(
                 NAME: A.DataTable.Base.NAME,
                 
                 usersOnlineNode: null,
-
+                
+                supported: true, // flag set after verification is current browser is supported by communication protocol
+                
                 prototype: {
                     ws: null,
 
@@ -99,18 +101,21 @@ AUI.add(
                     */
                     bindCommunication: function() {
                         var instance = this;
-
-                        var sheet = A.one('#record_set_id');
-                        var sheetId = null;
-                        if(sheet){
-                        	sheetId = sheet.get('value');
-                        }
-                        var instance = this;
                         if (!window.WebSocket) { // if websocket not supported from current browser
                             instance.supported = false;
                             return;
                         };
-                        instance.ws = new WebSocket(instance.get('websocketAddress'));
+                        
+                        var websocketAddress = instance.get('websocketAddress');
+                        var sheet = A.one('#record_set_id');
+                        var sheetId = null;
+                        
+                        if(sheet){
+                        	sheetId = sheet.get('value');
+                        	websocketAddress += '&sheetId=' + sheetId;
+                        }
+
+                        instance.ws = new WebSocket(websocketAddress);
                         instance.ws.onopen = function (evt) {
                         	instance.ws.send(A.JSON.stringify({
                         		action:  RivetCollaborationSpreadSheet.CONSTANTS.LOGIN
