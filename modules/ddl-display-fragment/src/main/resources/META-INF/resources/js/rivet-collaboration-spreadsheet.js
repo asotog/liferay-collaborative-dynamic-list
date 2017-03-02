@@ -21,6 +21,9 @@ AUI.add(
                 ATTRS: {
                     onlineUsers: {
                         value: []
+                    },
+                    websocketAddress: {
+                    	value: ''
                     }
                 },
                 
@@ -41,7 +44,7 @@ AUI.add(
                     },
                     
                     bindCollaborativeEvents: function() {
-                        this.bindAtmosphere();
+                        this.bindCommunication();
                         this.after('onlineUsersChange', A.bind(this._renderOnlineUsers, this));
                         this.on('cellHighlighted', A.bind(this._currentUserCellHighlighted, this));
                         this.on('cellValueUpdated', A.bind(this._currentUserCellValueUpdated, this));
@@ -63,7 +66,7 @@ AUI.add(
                     *
                     */
                     _currentUserCellHighlighted: function(e) {
-                        this.ws.push(A.JSON.stringify({
+                        this.ws.send(A.JSON.stringify({
                             action:  RivetCollaborationSpreadSheet.CONSTANTS.CELL_HIGHLIGHTED,
                             userId: Liferay.ThemeDisplay.getUserId(),
                             record: e.record,
@@ -86,48 +89,47 @@ AUI.add(
                             column: e.col    
                         };
 
-                        this.ws.push(A.JSON.stringify(data));
+                        this.ws.send(A.JSON.stringify(data));
                     },
 
                     /**
-                    * Initializes and binds atmosphere events
+                    * Initializes and binds communication events
                     *
                     *
                     */
-                    bindAtmosphere: function() {
+                    bindCommunication: function() {
                         var instance = this;
-                        return;
+
                         var sheet = A.one('#record_set_id');
                         var sheetId = null;
                         if(sheet){
                         	sheetId = sheet.get('value');
                         }
-                        
-                        var baseUrl = document.location.toString().split('/').slice(0, 3).join('/'); // gets only protocol, domain and port from current url
-                        var request = {
-                            url: baseUrl + '/delegate/collaborative-spreadsheet/'+sheetId+'?baseImagePath=' +
-                                encodeURIComponent(Liferay.ThemeDisplay.getPathImage())+'&sheetId='+sheetId,
-                            trackMessageLength: true,
-                            transport: 'websocket'
+                        var instance = this;
+                        if (!window.WebSocket) { // if websocket not supported from current browser
+                            instance.supported = false;
+                            return;
                         };
-
-                        request.onMessage = function (response) {
-                            instance.processMessage(response);
+                        instance.ws = new WebSocket(instance.get('websocketAddress'));
+                        instance.ws.onopen = function (evt) {
+                        	instance.ws.send(A.JSON.stringify({
+                        		action:  RivetCollaborationSpreadSheet.CONSTANTS.LOGIN
+                        	}));
                         };
-
-                        request.onOpen = function (response) {
-                            instance.ws.push(A.JSON.stringify({
-                                action:  RivetCollaborationSpreadSheet.CONSTANTS.LOGIN
-                            }));
+                        instance.ws.onclose = function (evt) {
+                            instance.fire('connectionClosed');
                         };
-                        
-                        request.onClose = function (response) {};
-
-                        atmosphere.util.on(window, "beforeunload", function (event) {
-                            atmosphere.unsubscribe();
+                        instance.ws.onmessage = function (event) {
+                        	instance.processMessage(event.data);
+                        };
+                        instance.ws.onerror = function (evt) {
+                            console.error(evt);
+                        };
+                        // when SPA (single page app) navigation is configured
+                        // need to listen beforeNavigate event to manually close connection
+                        Liferay.on('beforeNavigate', function (event) {
+                        	instance.ws.close();
                         });
-
-                        instance.ws = atmosphere.subscribe(request);
                     },
                     
                     /**
@@ -271,7 +273,7 @@ AUI.add(
                     * other users in order to add the rows as well
                     */
                     addEmptyRowsAndBroadcast: function(num) {
-                        this.ws.push(A.JSON.stringify({
+                        this.ws.send(A.JSON.stringify({
                             action: RivetCollaborationSpreadSheet.CONSTANTS.ROWS_ADDED,
                             num: num,
                             userId: Liferay.ThemeDisplay.getUserId()

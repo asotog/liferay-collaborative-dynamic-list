@@ -21,6 +21,7 @@
 --%>
 
 <%@ include file="/init.jsp" %>
+<%@ page import="com.liferay.portal.kernel.util.HttpUtil" %>
 
 <%
 DDLRecordSet recordSet = (DDLRecordSet)request.getAttribute(DDLWebKeys.DYNAMIC_DATA_LISTS_RECORD_SET);
@@ -30,11 +31,20 @@ if (editable || ddlDisplayContext.isAdminPortlet()) {
 }
 DDMStructure ddmStructure = recordSet.getDDMStructure();
 %>
+
 <% 
 int rivetts = 1457364222;
+String MODULE_PATH = "/o/dynamic-data-lists-web";
+
+String userImagePath = user.getPortraitURL(themeDisplay);
+String websocketURL = "ws://" + request.getServerName() + ":" + request.getServerPort();
+websocketURL = HttpUtil.addParameter(websocketURL, "userId", user.getUserId());
+websocketURL = HttpUtil.addParameter(websocketURL, "userImagePath", userImagePath);
+websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.get(request, "rivetlogic.whiteboard.guest.name.label"));
+
 %>
 <style type="text/css">
-@import url("/html/portlet/dynamic_data_lists/css/rivet-main.css?t=<%= rivetts %>");
+@import url("<%= MODULE_PATH %>/css/rivet-collaboration-spreadsheet.css?t=<%= rivetts %>");
 </style>
 <script id="spreadsheet-online-users" type="text/x-handlebars-template">
     <ul class="unstyled">
@@ -74,35 +84,38 @@ int rivetts = 1457364222;
 
 <%@ include file="/custom_spreadsheet_editors.jspf" %>
 <%-- CUSTOM  --%>
+
 <script>
-var MODULE_PATH = '/o/dynamic-data-lists-web';
-AUI().applyConfig({
-    groups : {
-        'collaboration-spreadsheet' : {
-            base : MODULE_PATH + '/js/',
-            combine : Liferay.AUI.getCombine(),
-            modules : {
-                'rivet-collaboration-spreadsheet' : {
-                    path : 'rivet-collaboration-spreadsheet.js',
-                    requires : []
-                },
-                'rivet-inline-cell' : {
-                    path : 'rivet-inline-cell.js',
-                    requires : []
-                },
-                'rivet-spreadsheet-datatable' : {
-                    path : 'rivet-spreadsheet-datatable.js',
-                    requires : []
-                },
-                'rivet-users-color' : {
-                    path : 'rivet-users-color.js',
-                    requires : []
-                },
-            },
-            root : MODULE_PATH + '/js/'
-        }
-    }
-});
+(function() {
+	var MODULE_PATH = '<%= MODULE_PATH %>';
+	AUI().applyConfig({
+	    groups : {
+	        'collaboration-spreadsheet' : {
+	            base : MODULE_PATH + '/js/',
+	            combine : Liferay.AUI.getCombine(),
+	            modules : {
+	                'rivet-collaboration-spreadsheet' : {
+	                    path : 'rivet-collaboration-spreadsheet.js',
+	                    requires : []
+	                },
+	                'rivet-inline-cell' : {
+	                    path : 'rivet-inline-cell.js',
+	                    requires : []
+	                },
+	                'rivet-spreadsheet-datatable' : {
+	                    path : 'rivet-spreadsheet-datatable.js',
+	                    requires : []
+	                },
+	                'rivet-users-color' : {
+	                    path : 'rivet-users-color.js',
+	                    requires : []
+	                },
+	            },
+	            root : MODULE_PATH + '/js/'
+	        }
+	    }
+	});
+})();
 </script>
 <aui:script use="rivet-collaboration-spreadsheet">
 var structure = <%= DDMUtil.getDDMFormFieldsJSONArray(ddmStructure, ddmStructure.getDefinition()) %>;
@@ -192,6 +205,7 @@ records.forEach(
 
 var spreadSheet = new Liferay.RivetCollaborationSpreadSheet(
     {
+        websocketAddress: '<%= websocketURL %>',
         boundingBox: '#<portlet:namespace />dataTable',
         columns: columns,
         contentBox: '#<portlet:namespace />dataTableContent',
