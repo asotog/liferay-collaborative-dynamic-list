@@ -1,0 +1,4 @@
+Bundle-Name: collaboration-spreadsheet-comm
+Bundle-SymbolicName: com.rivetlogic.spreadsheet.realtime
+Bundle-Version: 1.0.0
+Export-Package: com.rivetlogic.spreadsheet.realtime.api

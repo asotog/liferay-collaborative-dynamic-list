@@ -37,7 +37,7 @@ int rivetts = 1457364222;
 String MODULE_PATH = "/o/dynamic-data-lists-web";
 
 String userImagePath = user.getPortraitURL(themeDisplay);
-String websocketURL = "ws://" + request.getServerName() + ":" + request.getServerPort();
+String websocketURL = "ws://" + request.getServerName() + ":" + request.getServerPort() + "/o/collaboration-spreadsheet";
 websocketURL = HttpUtil.addParameter(websocketURL, "userId", user.getUserId());
 websocketURL = HttpUtil.addParameter(websocketURL, "userImagePath", userImagePath);
 websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.get(request, "rivetlogic.whiteboard.guest.name.label"));
