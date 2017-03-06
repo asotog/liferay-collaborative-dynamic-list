@@ -39,9 +39,9 @@ public class SpreadsheetEndpoint extends Endpoint {
 	public static final String CACHE_NAME = SpreadsheetEndpoint.class.getName();
 	@SuppressWarnings("rawtypes")
 	private static PortalCache portalCache = MultiVMPoolUtil.getPortalCache(CACHE_NAME);
-	
+
 	private static final Log LOG = LogFactoryUtil.getLog(SpreadsheetEndpoint.class);
-	
+
 	@Override
 	public void onOpen(Session session, EndpointConfig config) {
 		// connection url query string parameters map
@@ -54,35 +54,36 @@ public class SpreadsheetEndpoint extends Endpoint {
 		// currentUser {User}
 		User currentUser = SpreadsheetUtil.getUser(Long.valueOf(userId));
 		String userName = StringPool.BLANK;
-		
+
 		ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap(sheetId);
-		
+
 		if (loggedUserMap.get(session.getId()) == null && currentUser != null) {
 			LOG.debug("base image path " + userImagePath + " sheet id " + sheetId);
 			if (currentUser.isDefaultUser()) {
-                LOG.debug("This is guest user");
-                userName = guestLabel;
-            } else {
-                userName = currentUser.getFullName();
-            }
+				LOG.debug("This is guest user");
+				userName = guestLabel;
+			} else {
+				userName = currentUser.getFullName();
+			}
 			LOG.debug(String.format("User full name: %s, User image path: %s", userName, userImagePath));
 			loggedUserMap.put(session.getId(), new UserData(userName, userImagePath, userId));
-			
+
 			/* adds message handler on current opened session */
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
 
 				@Override
 				public void onMessage(String text) {
-					onMessageHandler(text, sheetId);
+					onMessageHandler(text, "34703");
 				}
 
 			});
 		}
-	}
 
+	}
+	
 	private void onMessageHandler(String text, String sheetId) {
 		ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap(sheetId);
-		
+		ConcurrentMap<String, Session> sessions = this.getSessions(sheetId);
 		try {
 			JSONObject jsonMessage = JSONFactoryUtil.createJSONObject(text);
 			
@@ -91,35 +92,24 @@ public class SpreadsheetEndpoint extends Endpoint {
 					.getString(SpreadsheetUtil.ACTION))) {
 				JSONObject usersLoggedMessage = SpreadsheetUtil
 						.generateLoggedUsersJSON(loggedUserMap);
-				// event.getResource().getBroadcaster().broadcast(usersLoggedMessage);
-				event.getResource()
-						.write(usersLoggedMessage.toString());
-			} else if (SpreadSheetHandlerUtil.CELL_HIGHLIGHTED
+				this.broadcast(usersLoggedMessage.toString(), sessions);
+			} else if (SpreadsheetUtil.CELL_HIGHLIGHTED
 					.equals(jsonMessage
-							.getString(SpreadSheetHandlerUtil.ACTION))) { // may be we can remove this as below code is funcioning same.
+							.getString(SpreadsheetUtil.ACTION))) { // may be we can remove this as below code is funcioning same.
 				/* just broadcast the message */
-				// LOG.debug("Broadcasting = " + message);
-				event.getResource().write(
-						SpreadSheetHandlerUtil.generateCommands(
-								jsonMessage).toString());
-			} else if (SpreadSheetHandlerUtil.CELL_VALUE_UPDATED
+				this.broadcast(SpreadsheetUtil.generateCommands(jsonMessage).toString(), sessions);
+			} else if (SpreadsheetUtil.CELL_VALUE_UPDATED
 					.equals(jsonMessage
-							.getString(SpreadSheetHandlerUtil.ACTION))) { // may be we can remove this as below code is funcioning same.
+							.getString(SpreadsheetUtil.ACTION))) { // may be we can remove this as below code is funcioning same.
 				/* just broadcast the message */
-				// LOG.debug("Broadcasting = " + message);
-				event.getResource().write(
-						SpreadSheetHandlerUtil.generateCommands(
-								jsonMessage).toString());
-			} else if (SpreadSheetHandlerUtil.ROW_ADDED
+				this.broadcast(SpreadsheetUtil.generateCommands(jsonMessage).toString(), sessions);
+			} else if (SpreadsheetUtil.ROW_ADDED
 					.equals(jsonMessage
-							.getString(SpreadSheetHandlerUtil.ACTION))) {
+							.getString(SpreadsheetUtil.ACTION))) {
 				/* just broadcast the message */
-				// LOG.debug("Broadcasting = " + message);
-				event.getResource().write(
-						SpreadSheetHandlerUtil.generateCommands(
-								jsonMessage).toString());
+				this.broadcast(SpreadsheetUtil.generateCommands(jsonMessage).toString(), sessions);
 			} else {
-				event.getResource().write(jsonMessage.toString());
+				this.broadcast(jsonMessage.toString(), sessions);
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -131,6 +121,16 @@ public class SpreadsheetEndpoint extends Endpoint {
 	public void onClose(Session session, CloseReason closeReason) {
 		// TODO Auto-generated method stub
 		super.onClose(session, closeReason);
+		
+		// connection url query string parameters map
+		Map<String, String[]> parameters = HttpUtil.getParameterMap(session.getQueryString());
+		// user parameters
+		String sheetId = parameters.get("sheetId")[0];
+		ConcurrentMap<String, UserData> loggedUsers = this.getLoggedUsersMap(sheetId);
+		ConcurrentMap<String, Session> sessions = this.getSessions(sheetId);
+		
+		loggedUsers.remove(session.getId());
+		sessions.remove(session.getId());
 	}
 	
 	/**
@@ -160,6 +160,31 @@ public class SpreadsheetEndpoint extends Endpoint {
 					loggedUserMap);
 		}
 		return loggedUserMap;
+	}
+	
+	/**
+	 * Retrieves logged users from cache
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private ConcurrentMap<String, Session> getSessions(String sheetId) {
+		Object sheet = portalCache.get(SpreadsheetUtil.SHEET_SESSIONS_KEY);
+		
+		ConcurrentMap<String, ConcurrentMap<String, Session>> sheetSessionsMap = (ConcurrentMap<String, ConcurrentMap<String, Session>>) sheet;
+		if (null == sheetSessionsMap) {
+			sheetSessionsMap = new ConcurrentSkipListMap<String, ConcurrentMap<String, Session>>();
+			portalCache.put(SpreadsheetUtil.SHEET_SESSIONS_KEY, sheetSessionsMap);
+		}
+
+		ConcurrentMap<String, Session> object = sheetSessionsMap.get(sheetId); 
+		
+		ConcurrentMap<String, Session> sessionsMap = (ConcurrentMap<String, Session>) object;
+		if (null == sessionsMap) {
+			sessionsMap = new ConcurrentSkipListMap<String, Session>();
+			sheetSessionsMap.put(sheetId, sessionsMap);
+		}
+		return sessionsMap;
 	}
 	
 	/**

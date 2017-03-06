@@ -33,7 +33,7 @@ DDMStructure ddmStructure = recordSet.getDDMStructure();
 %>
 
 <% 
-int rivetts = 1457364222;
+int rivetts = 1457364222; // avoid caching on css and js 2
 String MODULE_PATH = "/o/dynamic-data-lists-web";
 
 String userImagePath = user.getPortraitURL(themeDisplay);
@@ -119,7 +119,8 @@ websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.g
 </script>
 <aui:script use="rivet-collaboration-spreadsheet">
 var structure = <%= DDMUtil.getDDMFormFieldsJSONArray(ddmStructure, ddmStructure.getDefinition()) %>;
-var columns = Liferay.SpreadSheet.buildDataTableColumns(<%= ddlDisplayContext.getRecordSetJSONArray(recordSet, locale) %>, '<%= LocaleUtil.toLanguageId(locale) %>', structure, <%= editable %>);
+// var columns = Liferay.SpreadSheet.buildDataTableColumns(<%= ddlDisplayContext.getRecordSetJSONArray(recordSet, locale) %>, '<%= LocaleUtil.toLanguageId(locale) %>', structure, <%= editable %>);
+var columns = Liferay.SpreadSheet.buildDataTableColumns(<%= ddlDisplayContext.getRecordSetJSONArray(recordSet, locale) %>, structure, <%= editable %>);
 
 var ignoreEmptyRecordsNumericSort = function(recA, recB, desc, field) {
     var a = recA.get(field);
