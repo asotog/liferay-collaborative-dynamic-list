@@ -265,7 +265,7 @@ if (!spreadSheet.supported) {
 
 // reset realtime spreadsheet model clientId
 Liferay.on('beforeNavigate', function (event) {
-	RivetCollaborationSpreadSheet.resetClientIdFromModel();
+	Liferay.RivetCollaborationSpreadSheet.resetClientIdFromModel();
 });
 
 window.<portlet:namespace />spreadSheet = spreadSheet;
