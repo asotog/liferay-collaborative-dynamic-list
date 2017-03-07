@@ -128,11 +128,15 @@ public class SpreadsheetEndpoint extends Endpoint {
 		Map<String, String[]> parameters = HttpUtil.getParameterMap(session.getQueryString());
 		// user parameters
 		String sheetId = parameters.get("sheetId")[0];
-		ConcurrentMap<String, UserData> loggedUsers = this.getLoggedUsersMap(sheetId);
+		ConcurrentMap<String, UserData> loggedUserMap = this.getLoggedUsersMap(sheetId);
 		ConcurrentMap<String, Session> sessions = this.getSessions(sheetId);
 		
-		loggedUsers.remove(session.getId());
+		loggedUserMap.remove(session.getId());
 		sessions.remove(session.getId());
+		
+		JSONObject usersLoggedMessage = SpreadsheetUtil
+				.generateLoggedUsersJSON(loggedUserMap);
+		this.broadcast(usersLoggedMessage.toString(), sessions);
 	}
 	
 	/**
