@@ -56,7 +56,8 @@ public class SpreadsheetEndpoint extends Endpoint {
 		String userName = StringPool.BLANK;
 
 		ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap(sheetId);
-
+		ConcurrentMap<String, Session> sessions = getSessions(sheetId);
+		
 		if (loggedUserMap.get(session.getId()) == null && currentUser != null) {
 			LOG.debug("base image path " + userImagePath + " sheet id " + sheetId);
 			if (currentUser.isDefaultUser()) {
@@ -67,13 +68,14 @@ public class SpreadsheetEndpoint extends Endpoint {
 			}
 			LOG.debug(String.format("User full name: %s, User image path: %s", userName, userImagePath));
 			loggedUserMap.put(session.getId(), new UserData(userName, userImagePath, userId));
-
+			sessions.put(session.getId(), session);
+			
 			/* adds message handler on current opened session */
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
 
 				@Override
 				public void onMessage(String text) {
-					onMessageHandler(text, "34703");
+					onMessageHandler(text, sheetId);
 				}
 
 			});

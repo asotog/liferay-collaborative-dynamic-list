@@ -144,7 +144,7 @@ AUI.add(
                     */
                     processMessage: function(response) {
                         var instance = this;
-                        var data = A.JSON.parse(response.responseBody);
+                        var data = A.JSON.parse(response);
                         if (!data.commands) {
                             return;
                         }
