@@ -1,7 +1,12 @@
 AUI.add(
     'rivet-collaboration-spreadsheet',
     function(A) {
-        
+    	var Lang = A.Lang;
+    	var INVALID = A.Attribute.INVALID_VALUE;
+    	var isArray = Lang.isArray;
+    	
+    	var modelClientId = 0;
+    	
         /**
         * Generates handlebars template from give template script tags by id
         *
@@ -15,7 +20,25 @@ AUI.add(
         var TEMPLATES = {
             usersOnline: getTemplate('#spreadsheet-online-users')
         };
-
+        
+        /**
+         * Custom model so client id can be reset before navigating to this page via SPA,
+         * so model id are sync between browsers, this model is only used on this component so does not affect anything else
+         */
+        var RivetSpreadSheetModel = A.Component.create({
+        	NAME: A.Model.NAME,
+        	EXTENDS: A.Model,
+        	prototype: {
+        		generateClientId: function () {
+        			modelClientId || (modelClientId = 0);
+        	        return this.constructor.NAME + '_' + (modelClientId += 1);
+        	    }
+        	}
+        });
+        
+        /**
+         * Real Time Collaboration Spreadsheet component
+         */
         var RivetCollaborationSpreadSheet = A.Component.create(
             {
                 ATTRS: {
@@ -283,6 +306,38 @@ AUI.add(
                             num: num,
                             userId: Liferay.ThemeDisplay.getUserId()
                         }));
+                    },
+                    
+                    /**
+                     * @override from datatable-core module
+                     * so we can specify a custom model instead of default Y.Model
+                     */
+                    _setData: function (val) {
+                        if (val === null) {
+                            val = [];
+                        }
+
+                        if (isArray(val)) {
+                            this._initDataProperty();
+                            
+                            this.data.model = RivetSpreadSheetModel; // specify custom model
+                            
+                            // silent to prevent subscribers to both reset and dataChange
+                            // from reacting to the change twice.
+                            // TODO: would it be better to return INVALID to silence the
+                            // dataChange event, or even allow both events?
+                            this.data.reset(val, { silent: true });
+
+                            // Return the instance ModelList to avoid storing unprocessed
+                            // data in the state and their vivified Model representations in
+                            // the instance's data property.  Decreases memory consumption.
+                            val = this.data;
+                        } else if (!val || !val.each || !val.toJSON) {
+                            // ModelList/ArrayList duck typing
+                            val = INVALID;
+                        }
+
+                        return val;
                     }
                 }
             });
@@ -294,7 +349,11 @@ AUI.add(
                 ROWS_ADDED: 'rowsAdded', // when users are changing cell value
                 USERS: 'users'
             };
-
+            
+            RivetCollaborationSpreadSheet.resetClientIdFromModel = function() {
+            	modelClientId = 0;
+            };
+            
             Liferay.RivetCollaborationSpreadSheet = RivetCollaborationSpreadSheet;
         },
     	'',

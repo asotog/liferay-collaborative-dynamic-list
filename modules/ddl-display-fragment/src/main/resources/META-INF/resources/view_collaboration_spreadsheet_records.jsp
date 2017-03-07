@@ -263,6 +263,11 @@ if (!spreadSheet.supported) {
 	A.one('.realtime-spreadsheet .communication-unsupported-alert').removeClass('hidden');
 };
 
+// reset realtime spreadsheet model clientId
+Liferay.on('beforeNavigate', function (event) {
+	RivetCollaborationSpreadSheet.resetClientIdFromModel();
+});
+
 window.<portlet:namespace />spreadSheet = spreadSheet;
 window.<portlet:namespace />structure = structure;
 </aui:script>
