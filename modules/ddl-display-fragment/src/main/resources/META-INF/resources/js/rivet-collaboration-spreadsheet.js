@@ -35,11 +35,11 @@ AUI.add(
                 
                 usersOnlineNode: null,
                 
-                supported: true, // flag set after verification is current browser is supported by communication protocol
-                
                 prototype: {
                     ws: null,
-
+                    
+                    supported: true, // flag set after verification is current browser is supported by communication protocol
+                    
                     initializer: function() {
                         this.bindCollaborativeEvents();
                         this.usersOnlineNode = this.get('srcNode').ancestor('.realtime-spreadsheet').one('.collaboration-users');

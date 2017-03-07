@@ -60,6 +60,8 @@ websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.g
 </script>
 <div class="container-fluid-1280 lfr-spreadsheet-container">
     <div id="<portlet:namespace />spreadsheet" class="realtime-spreadsheet">
+        <div class="connection-lost-alert alert alert-danger hidden" role="alert">Connection was lost please refresh the page. <a href="javascript:document.location.reload()">Reload</a></div>
+        <div class="communication-unsupported-alert alert alert-danger hidden" role="alert">Communication protocol not supported by your current browser. Please try <a href="http://caniuse.com/#search=websocket" target="_blank">supported</a> browser</div>
 	    <input type="hidden" id="record_set_id" value="<%= recordSet.getRecordSetId() %>">
         <div class="collaboration-users"></div>
         <div class="table-striped yui3-widget yui3-datatable" id="<portlet:namespace />dataTable">
@@ -252,6 +254,14 @@ spreadSheet.get('boundingBox').unselectable();
         }
     );
 </c:if>
+
+spreadSheet.on('connectionClosed', function() {
+	A.one('.realtime-spreadsheet .connection-lost-alert').removeClass('hidden');
+});
+
+if (!spreadSheet.supported) {
+	A.one('.realtime-spreadsheet .communication-unsupported-alert').removeClass('hidden');
+};
 
 window.<portlet:namespace />spreadSheet = spreadSheet;
 window.<portlet:namespace />structure = structure;
