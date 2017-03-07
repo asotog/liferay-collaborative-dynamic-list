@@ -71,6 +71,7 @@
   border-radius: 50%;
   border-width: 2px;
   border-style: solid;
+  width: 30px;
 }
 
 .collaboration-users a.current-user img {

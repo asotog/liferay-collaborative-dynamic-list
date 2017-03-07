@@ -40,7 +40,7 @@ String userImagePath = user.getPortraitURL(themeDisplay);
 String websocketURL = "ws://" + request.getServerName() + ":" + request.getServerPort() + "/o/collaboration-spreadsheet";
 websocketURL = HttpUtil.addParameter(websocketURL, "userId", user.getUserId());
 websocketURL = HttpUtil.addParameter(websocketURL, "userImagePath", userImagePath);
-websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.get(request, "rivetlogic.whiteboard.guest.name.label"));
+websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.get(request, "guest"));
 
 %>
 <style type="text/css">
