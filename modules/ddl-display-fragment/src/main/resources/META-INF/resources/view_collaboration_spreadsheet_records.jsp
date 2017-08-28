@@ -121,8 +121,8 @@ websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.g
 </script>
 <aui:script use="rivet-collaboration-spreadsheet">
 var structure = <%= DDMUtil.getDDMFormFieldsJSONArray(ddmStructure, ddmStructure.getDefinition()) %>;
-// var columns = Liferay.SpreadSheet.buildDataTableColumns(<%= ddlDisplayContext.getRecordSetJSONArray(recordSet, locale) %>, '<%= LocaleUtil.toLanguageId(locale) %>', structure, <%= editable %>);
-var columns = Liferay.SpreadSheet.buildDataTableColumns(<%= ddlDisplayContext.getRecordSetJSONArray(recordSet, locale) %>, structure, <%= editable %>);
+var columns = Liferay.SpreadSheet.buildDataTableColumns(<%= ddlDisplayContext.getRecordSetJSONArray(recordSet, locale) %>, '<%= LocaleUtil.toLanguageId(locale) %>', structure, <%= editable %>);
+// var columns = Liferay.SpreadSheet.buildDataTableColumns(<%= ddlDisplayContext.getRecordSetJSONArray(recordSet, locale) %>, structure, <%= editable %>);
 
 var ignoreEmptyRecordsNumericSort = function(recA, recB, desc, field) {
     var a = recA.get(field);
