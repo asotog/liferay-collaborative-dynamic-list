@@ -37,7 +37,24 @@ int rivetts = 1457364222; // avoid caching on css and js 2
 String MODULE_PATH = "/o/dynamic-data-lists-web";
 
 String userImagePath = user.getPortraitURL(themeDisplay);
-String websocketURL = "ws://" + request.getServerName() + ":" + request.getServerPort() + "/o/collaboration-spreadsheet";
+
+// Read WS Custom Config
+boolean wsSecured = PrefsParamUtil.getBoolean(PortletPreferencesFactoryUtil.getPortletSetup(renderRequest), renderRequest, "wssecured");
+boolean wsUsecustomurl = PrefsParamUtil.getBoolean(PortletPreferencesFactoryUtil.getPortletSetup(renderRequest), renderRequest, "wsusecustomurl");
+String wsCustombasepath = PrefsParamUtil.getString(PortletPreferencesFactoryUtil.getPortletSetup(renderRequest), renderRequest, "wscustombasepath");
+
+String baseWebsocketURL = request.getServerName() + ":" + request.getServerPort();
+if (wsUsecustomurl) {
+    baseWebsocketURL = baseWebsocketURL + wsCustombasepath;
+}
+
+String webSocketProtocol = "ws://";
+if (wsSecured) {
+    webSocketProtocol = "wss://";
+}
+
+String websocketURL = webSocketProtocol + baseWebsocketURL + "/o/collaboration-spreadsheet";
+
 websocketURL = HttpUtil.addParameter(websocketURL, "userId", user.getUserId());
 websocketURL = HttpUtil.addParameter(websocketURL, "userImagePath", userImagePath);
 websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.get(request, "guest"));
