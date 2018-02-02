@@ -223,6 +223,22 @@ records.forEach(
     }
 );
 
+var editAction = 'dblclick';
+
+var viewport =  function() {
+    var e = window, a = 'inner';
+    if (!('innerWidth' in window )) {
+        a = 'client';
+        e = document.documentElement || document.body;
+    }
+    return { widthM : e[ a+'Width' ] };
+}
+
+if(viewport().widthM <= 979){
+    editAction = 'click';
+}
+
+
 var spreadSheet = new Liferay.RivetCollaborationSpreadSheet(
     {
         websocketAddress: '<%= websocketURL %>',
@@ -230,7 +246,7 @@ var spreadSheet = new Liferay.RivetCollaborationSpreadSheet(
         columns: columns,
         contentBox: '#<portlet:namespace />dataTableContent',
         data: data,
-        editEvent: 'dblclick',
+        editEvent: editAction,
         plugins: [
             {
                 fn: A.Plugin.DataTableHighlight,
