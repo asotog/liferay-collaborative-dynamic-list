@@ -130,13 +130,8 @@ AUI.add(
                         };
                         
                         var websocketAddress = instance.get('websocketAddress');
-                        var sheet = A.one('#record_set_id');
-                        var sheetId = null;
-                        
-                        if(sheet){
-                        	sheetId = sheet.get('value');
-                        	websocketAddress += '&sheetId=' + sheetId;
-                        }
+                        var sheetId = this.get('srcNode').getAttribute('id'); // use portlet instance id for sheet id value
+                        websocketAddress += '&sheetId=' + sheetId;
 
                         instance.ws = new WebSocket(websocketAddress);
                         instance.ws.onopen = function (evt) {

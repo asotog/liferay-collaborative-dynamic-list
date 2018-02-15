@@ -223,21 +223,7 @@ records.forEach(
     }
 );
 
-var editAction = 'dblclick';
-
-var viewport =  function() {
-    var e = window, a = 'inner';
-    if (!('innerWidth' in window )) {
-        a = 'client';
-        e = document.documentElement || document.body;
-    }
-    return { widthM : e[ a+'Width' ] };
-}
-
-if(viewport().widthM <= 979){
-    editAction = 'click';
-}
-
+var editAction = A.one('html').hasClass('touch') ? 'click' : 'dblclick';
 
 var spreadSheet = new Liferay.RivetCollaborationSpreadSheet(
     {
