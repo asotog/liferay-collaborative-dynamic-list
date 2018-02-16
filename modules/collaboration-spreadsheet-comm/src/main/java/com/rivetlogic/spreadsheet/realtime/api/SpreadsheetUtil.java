@@ -24,6 +24,7 @@ public class SpreadsheetUtil {
 	public static final String CELL_HIGHLIGHTED = "cellHighlighted";
 	public static final String CELL_VALUE_UPDATED = "cellValueUpdated";
 	public static final String ROW_ADDED = "rowsAdded";
+	public static final String LAST_ROW_DELETED = "lastRowDeleted";
 
 	/* JSON PROPERTIES */
 	public static final String USERS = "users";

@@ -183,6 +183,9 @@ AUI.add(
                                 case RivetCollaborationSpreadSheet.CONSTANTS.ROWS_ADDED:
                                     instance.onRowsAddedMessage(item);
                                     break;
+                                case RivetCollaborationSpreadSheet.CONSTANTS.LAST_ROW_DELETED:
+                                    instance.onLastRowDeletedMessage(item);
+                                    break;
                                 default:
                                     console.error('Unable to match command');
                             };
@@ -248,6 +251,17 @@ AUI.add(
                     },
 
                     /*
+                    * Called when last row deleted message arrives
+                    */
+                    onLastRowDeletedMessage: function(data) {
+                        var instance = this;
+                        if (Liferay.ThemeDisplay.getUserId() !== data.userId) {
+                            var currentSize = instance.get('data').size();
+                            instance.get('data').remove(currentSize - 1);
+                        }
+                    },
+
+                    /*
                     * Highlight cells that belongs to other users interactions
                     * and updates cells value, called when message arrives
                     * 
@@ -302,6 +316,16 @@ AUI.add(
                             userId: Liferay.ThemeDisplay.getUserId()
                         }));
                     },
+
+                    /**
+                     * Removes the last row from the sheet
+                     */
+                    removeLastRowAndBroadcast: function() {
+                        this.ws.send(A.JSON.stringify({
+                            action: RivetCollaborationSpreadSheet.CONSTANTS.LAST_ROW_DELETED,
+                            userId: Liferay.ThemeDisplay.getUserId()
+                        }));
+                    },
                     
                     /**
                      * @override from datatable-core module
@@ -342,6 +366,7 @@ AUI.add(
                 CELL_HIGHLIGHTED: 'cellHighlighted', // when users highlight cell,
                 CELL_VALUE_UPDATED: 'cellValueUpdated', // when users are changing cell value
                 ROWS_ADDED: 'rowsAdded', // when users are changing cell value
+                LAST_ROW_DELETED: 'lastRowDeleted',
                 USERS: 'users'
             };
             

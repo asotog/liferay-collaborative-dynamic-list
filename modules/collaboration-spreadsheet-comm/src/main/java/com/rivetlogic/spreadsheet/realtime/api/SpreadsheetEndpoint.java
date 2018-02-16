@@ -110,6 +110,11 @@ public class SpreadsheetEndpoint extends Endpoint {
 							.getString(SpreadsheetUtil.ACTION))) {
 				/* just broadcast the message */
 				this.broadcast(SpreadsheetUtil.generateCommands(jsonMessage).toString(), sessions);
+			} else if (SpreadsheetUtil.LAST_ROW_DELETED
+					.equals(jsonMessage
+							.getString(SpreadsheetUtil.ACTION))) {
+				/* just broadcast the message */
+				this.broadcast(SpreadsheetUtil.generateCommands(jsonMessage).toString(), sessions);
 			} else {
 				this.broadcast(jsonMessage.toString(), sessions);
 			}

@@ -33,7 +33,7 @@ DDMStructure ddmStructure = recordSet.getDDMStructure();
 %>
 
 <% 
-int rivetts = 1457364222; // avoid caching on css and js 2
+int rivetts = 20180216; // avoid caching on css and js 2
 String MODULE_PATH = "/o/dynamic-data-lists-web";
 
 String userImagePath = user.getPortraitURL(themeDisplay);
@@ -98,6 +98,7 @@ websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.g
                 <aui:option label="50" />
             </aui:select>
         </div>
+        <aui:button cssClass="remove-last-row-btn btn-warning" inlineField="<%= true %>" name="removeLastRow" value="Remove Last Row" />
     </c:if>
 </div>
 
@@ -269,6 +270,21 @@ spreadSheet.get('boundingBox').unselectable();
             <%-- Custom callback added when response returns broadcast message to the rest of the users connected --%>
             spreadSheet.updateMinDisplayRows(spreadSheet.get('data').size(), function() {
                 spreadSheet.addEmptyRowsAndBroadcast(numberOfRecords);
+            });
+        }
+    );
+    /* Rivetlogic added this */
+    A.one('#<portlet:namespace />removeLastRow').on(
+        'click',
+        function(event) {
+            if (spreadSheet.get('data').size() <= 1) { // should have more than 1 row in order to delete last row action
+                return;
+            }
+            var currentSize = spreadSheet.get('data').size();
+            spreadSheet.get('data').remove(currentSize - 1);
+            <%-- Custom callback added when response returns broadcast message to the rest of the users connected --%>
+            spreadSheet.updateMinDisplayRows(currentSize - 1, function() {
+                spreadSheet.removeLastRowAndBroadcast();
             });
         }
     );
