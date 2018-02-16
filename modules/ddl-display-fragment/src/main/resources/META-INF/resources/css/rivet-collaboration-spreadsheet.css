@@ -114,3 +114,7 @@
 .collaboration-users a:hover .user-info {
   opacity: 0.8;
 }
+
+.lfr-spreadsheet-container .remove-last-row-btn {
+  margin-top: 20px;
+}
