@@ -96,7 +96,7 @@ AUI.add(
                     var value = Liferay.RivetInlineCellEditor.getCellValue(tbl.activeCell);
                     tbl.activeCell.append(this.ELEMENT_TEMPLATE);
                     var field = tbl.activeCell.one('input');
-                    field.removeClass('hidden');
+                    field.removeClass('d-none');
                     field.set('value', value);
                     field.focus();
                 }
