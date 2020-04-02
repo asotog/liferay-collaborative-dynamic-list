@@ -1,7 +1,7 @@
 liferay-collaborative-dynamic-list
 ==================
 
-Collaboration whiteboard app in real time for multiple users for Liferay 7.
+Collaborative dynamic list in real time for multiple users for Liferay 7.
 
 
 ## Docker local environment startup
