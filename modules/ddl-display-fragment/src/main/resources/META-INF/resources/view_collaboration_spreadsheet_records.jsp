@@ -67,7 +67,7 @@ websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.g
     <ul class="unstyled">
         {{#each users}}
         <li>
-            <a href="" class="user-portrait">
+            <a href="#" data-senna-off="true" class="user-portrait">
                 <img style="border-color: {{color}} !important;" src="{{userImagePath}}" alt="">
                 <span style="background-color: {{color}};" class="user-info">{{userName}}</span>                                                    
             </a>
@@ -77,8 +77,8 @@ websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.g
 </script>
 <div class="container-fluid-1280 lfr-spreadsheet-container">
     <div id="<portlet:namespace />spreadsheet" class="realtime-spreadsheet">
-        <div class="connection-lost-alert alert alert-danger hidden" role="alert">Connection was lost please refresh the page. <a href="javascript:document.location.reload()">Reload</a></div>
-        <div class="communication-unsupported-alert alert alert-danger hidden" role="alert">Communication protocol not supported by your current browser. Please try <a href="http://caniuse.com/#search=websocket" target="_blank">supported</a> browser</div>
+        <div class="connection-lost-alert alert alert-danger d-none" role="alert">Connection was lost please refresh the page. <a href="javascript:document.location.reload()">Reload</a></div>
+        <div class="communication-unsupported-alert alert alert-danger d-none" role="alert">Communication protocol not supported by your current browser. Please try <a href="http://caniuse.com/#search=websocket" target="_blank">supported</a> browser</div>
 	    <input type="hidden" id="record_set_id" value="<%= recordSet.getRecordSetId() %>">
         <div class="collaboration-users"></div>
         <div class="table-striped yui3-widget yui3-datatable" id="<portlet:namespace />dataTable">
@@ -291,11 +291,11 @@ spreadSheet.get('boundingBox').unselectable();
 </c:if>
 
 spreadSheet.on('connectionClosed', function() {
-	A.one('.realtime-spreadsheet .connection-lost-alert').removeClass('hidden');
+	A.one('.realtime-spreadsheet .connection-lost-alert').removeClass('d-none');
 });
 
 if (!spreadSheet.supported) {
-	A.one('.realtime-spreadsheet .communication-unsupported-alert').removeClass('hidden');
+	A.one('.realtime-spreadsheet .communication-unsupported-alert').removeClass('d-none');
 };
 
 // reset realtime spreadsheet model clientId

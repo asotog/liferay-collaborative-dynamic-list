@@ -13,7 +13,6 @@
  * details.
  */
 --%>
-
 <%@ include file="/init.jsp" %>
 
 <%
@@ -168,12 +167,10 @@ String wsCustombasepath = PrefsParamUtil.getString(PortletPreferencesFactoryUtil
 									}
 
 									for (DDMTemplate template : templates) {
-										if (!DDMTemplatePermission.contains(permissionChecker, scopeGroupId, template.getTemplateId(), PortletKeys.PORTLET_DISPLAY_TEMPLATE, ActionKeys.VIEW)) {
+										if (!DDMTemplatePermission.contains(permissionChecker, template.getTemplateId(), ActionKeys.VIEW)) {
 											continue;
 										}
-
 										boolean selected = false;
-
 										if (displayDDMTemplateId == template.getTemplateId()) {
 											selected = true;
 										}
@@ -200,12 +197,10 @@ String wsCustombasepath = PrefsParamUtil.getString(PortletPreferencesFactoryUtil
 									}
 
 									for (DDMTemplate template : templates) {
-										if (!DDMTemplatePermission.contains(permissionChecker, scopeGroupId, template.getTemplateId(), PortletKeys.PORTLET_DISPLAY_TEMPLATE, ActionKeys.VIEW)) {
+										if (!DDMTemplatePermission.contains(permissionChecker, template.getTemplateId(), ActionKeys.VIEW)) {
 											continue;
 										}
-
 										boolean selected = false;
-
 										if (formDDMTemplateId == template.getTemplateId()) {
 											selected = true;
 										}
