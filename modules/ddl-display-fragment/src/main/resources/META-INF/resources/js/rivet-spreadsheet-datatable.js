@@ -155,7 +155,9 @@ AUI.add(
                     this.get('boundingBox').all('.' + cellRef).each(function() {
                         this.removeAttribute('ref-class');
                         this.removeClass(cellRef);
-                        this.removeClass('cell-highlight');
+                        if (!this.hasClass('current-user')) {
+                            this.removeClass('cell-highlight');
+                        }
                         this.setStyle(BORDER_COLOR, '');
                         this.one('.cell-highlight-title').remove();
                     });
