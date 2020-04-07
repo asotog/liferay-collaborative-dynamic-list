@@ -45,6 +45,11 @@ AUI.add(
                     onlineUsers: {
                         value: []
                     },
+                    // keeps path where component is initialized so on close can be checked if 
+                    // disconnection triggered because navigated out or unexpected disconnection
+                    path: {
+                        value: '',
+                    },
                     websocketAddress: {
                     	value: ''
                     }
@@ -64,6 +69,7 @@ AUI.add(
                     supported: true, // flag set after verification is current browser is supported by communication protocol
                     
                     initializer: function() {
+                        this.set('path', document.location.pathname);
                         this.bindCollaborativeEvents();
                         this.usersOnlineNode = this.get('srcNode').ancestor('.realtime-spreadsheet').one('.collaboration-users');
                     },
@@ -140,7 +146,12 @@ AUI.add(
                         	}));
                         };
                         instance.ws.onclose = function (evt) {
-                            instance.fire('connectionClosed');
+                            window.setTimeout(() => {
+                                // check if user navigated out of the page, if no, triggered connection closed
+                                if (document.location.pathname === instance.get('path')) {
+                                    instance.fire('connectionClosed');
+                                }
+                            }, 1000);
                         };
                         instance.ws.onmessage = function (event) {
                         	instance.processMessage(event.data);
