@@ -139,22 +139,21 @@ AUI.add(
                 */
                 _updateTitledHighlightCellByClasses: function(data) {
                     if (data.cell) {
-                        this.get('boundingBox').all('.' + data.refClass + ' .cell-highlight-title').remove();
-                        var cells = this.get('boundingBox').all('.' + data.refClass);
-                        cells.setStyle(BORDER_COLOR, '');
-                        cells.removeClass(data.refClass).removeClass('cell-highlight');
+                        this.clearHighlightByCellRef(data.refClass);
+                        data.cell.setAttribute('ref-class', data.refClass);
                         data.cell.addClass(data.refClass).addClass('cell-highlight');
                         data.cell.setStyle(BORDER_COLOR, data.color);
                         data.cell.append('<span style="background-color: ' + data.color + 
                             ';" class="cell-highlight-title">' + data.title + '</span>')
                     }
                 },
-                
+
                 /*
                 * Removes cell highlight by given class
                 */
                 clearHighlightByCellRef: function(cellRef) {
                     this.get('boundingBox').all('.' + cellRef).each(function() {
+                        this.removeAttribute('ref-class');
                         this.removeClass(cellRef);
                         this.removeClass('cell-highlight');
                         this.setStyle(BORDER_COLOR, '');
