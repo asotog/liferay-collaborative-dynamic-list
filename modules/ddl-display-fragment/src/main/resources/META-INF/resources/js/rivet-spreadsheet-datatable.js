@@ -3,7 +3,7 @@ AUI.add(
     function(A) {
         
         var HIGHLIGHTED_CELL = '.cell-highlight.current-user';
-        var BORDER_COLOR = 'border-color';
+        var BORDER_COLOR = 'box-shadow';
 
         var RivetSpreadSheet = A.Component.create({
             ATTRS: {
@@ -128,8 +128,13 @@ AUI.add(
                 */
                 _updateHighlightCellColor: function(cell) {
                     cell.addClass('cell-highlight').addClass('current-user');
-                    cell.setStyle(BORDER_COLOR, this.get('highlightColor'));
+                    cell.setStyle(BORDER_COLOR, this._getBoxShadow(this.get('highlightColor')));
                 },
+
+                _getBoxShadow: function (color) {
+                    return `0 1px 0 1px ${color}`;
+                },
+                
                 
                 /*
                 * Updates cell color by give color parameter and puts title over the 
@@ -142,7 +147,7 @@ AUI.add(
                         this.clearHighlightByCellRef(data.refClass);
                         data.cell.setAttribute('ref-class', data.refClass);
                         data.cell.addClass(data.refClass).addClass('cell-highlight');
-                        data.cell.setStyle(BORDER_COLOR, data.color);
+                        data.cell.setStyle(BORDER_COLOR, this._getBoxShadow(data.color));
                         data.cell.append('<span style="background-color: ' + data.color + 
                             ';" class="cell-highlight-title">' + data.title + '</span>')
                     }
