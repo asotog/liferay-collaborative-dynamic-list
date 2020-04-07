@@ -352,6 +352,25 @@ AUI.add(
                         }
 
                         return val;
+                    },
+
+                    removeRecord: function(recordId, callback) {
+                        if (!recordId) {
+                            return;
+                        }
+                        Liferay.Service(
+                            '/ddl.ddlrecord/delete-record',
+                            {
+                                recordId: recordId,
+                                serviceContext: JSON.stringify(
+                                    {
+                                        scopeGroupId: themeDisplay.getScopeGroupId(),
+                                        userId: themeDisplay.getUserId()
+                                    }
+                                )
+                            },
+                            callback || A.Lang.emptyFn
+                        );
                     }
                 }
             });

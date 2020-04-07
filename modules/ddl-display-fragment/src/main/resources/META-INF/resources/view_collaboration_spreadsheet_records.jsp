@@ -280,8 +280,9 @@ spreadSheet.get('boundingBox').unselectable();
             if (spreadSheet.get('data').size() <= 1) { // should have more than 1 row in order to delete last row action
                 return;
             }
-            var currentSize = spreadSheet.get('data').size();
-            spreadSheet.get('data').remove(currentSize - 1);
+            var currentSize = spreadSheet.get('data').size(); 
+            spreadSheet.removeRecord(spreadSheet.get('data').item(currentSize - 1).get('recordId'));
+            spreadSheet.get('data').remove(currentSize - 1); 
             <%-- Custom callback added when response returns broadcast message to the rest of the users connected --%>
             spreadSheet.updateMinDisplayRows(currentSize - 1, function() {
                 spreadSheet.removeLastRowAndBroadcast();
