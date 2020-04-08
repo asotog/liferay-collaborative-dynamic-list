@@ -1,10 +1,12 @@
 AUI.add(
     'rivet-collaboration-spreadsheet',
     function(A) {
+        window.RivetCollaborationSpreadSheetGlobal = window.RivetCollaborationSpreadSheetGlobal || {};
+    
     	var Lang = A.Lang;
     	var INVALID = A.Attribute.INVALID_VALUE;
     	var isArray = Lang.isArray;
-    	
+        
     	var modelClientId = 0;
     	
         /**
@@ -143,12 +145,15 @@ AUI.add(
                         instance.ws.onopen = function (evt) {
                         	instance.ws.send(A.JSON.stringify({
                         		action:  RivetCollaborationSpreadSheet.CONSTANTS.LOGIN
-                        	}));
+                            }));
+                            instance.fire('connectionOpened');
+                            window.RivetCollaborationSpreadSheetGlobal.connected = true;
                         };
                         instance.ws.onclose = function (evt) {
-                            window.setTimeout(() => {
-                                // check if user navigated out of the page, if no, triggered connection closed
-                                if (document.location.pathname === instance.get('path')) {
+                            window.RivetCollaborationSpreadSheetGlobal.connected = false;
+                            setTimeout(function() {
+                                if (!window.RivetCollaborationSpreadSheetGlobal.connected
+                                    && document.location.pathname === instance.get('path')) {
                                     instance.fire('connectionClosed');
                                 }
                             }, 1000);

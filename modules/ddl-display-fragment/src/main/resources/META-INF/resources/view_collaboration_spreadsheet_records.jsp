@@ -295,6 +295,10 @@ spreadSheet.on('connectionClosed', function() {
 	A.one('.realtime-spreadsheet .connection-lost-alert').removeClass('d-none');
 });
 
+spreadSheet.on('connectionOpened', function() {
+	A.one('.realtime-spreadsheet .connection-lost-alert').addClass('d-none');
+});
+
 if (!spreadSheet.supported) {
 	A.one('.realtime-spreadsheet .communication-unsupported-alert').removeClass('d-none');
 };
