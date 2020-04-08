@@ -164,7 +164,9 @@ AUI.add(
                             this.removeClass('cell-highlight');
                         }
                         this.setStyle(BORDER_COLOR, '');
-                        this.one('.cell-highlight-title').remove();
+                        if (this.one('.cell-highlight-title')) {
+                            this.one('.cell-highlight-title').remove();
+                        }
                     });
                 }
             }

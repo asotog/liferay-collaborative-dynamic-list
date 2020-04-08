@@ -22,6 +22,7 @@
 
 <%@ include file="/init.jsp" %>
 <%@ page import="com.liferay.portal.kernel.util.HttpUtil" %>
+<%@ page import="java.util.Date" %>
 
 <%
 DDLRecordSet recordSet = (DDLRecordSet)request.getAttribute(DDLWebKeys.DYNAMIC_DATA_LISTS_RECORD_SET);
@@ -55,6 +56,8 @@ if (wsSecured) {
 
 String websocketURL = webSocketProtocol + baseWebsocketURL + "/o/collaboration-spreadsheet";
 
+long collaborationUserId = themeDisplay.isSignedIn() ? user.getUserId() : new Date().getTime();
+websocketURL = HttpUtil.addParameter(websocketURL, "collaborationUserId", collaborationUserId);
 websocketURL = HttpUtil.addParameter(websocketURL, "userId", user.getUserId());
 websocketURL = HttpUtil.addParameter(websocketURL, "userImagePath", userImagePath);
 websocketURL = HttpUtil.addParameter(websocketURL, "guestLabel",  LanguageUtil.get(request, "guest"));
@@ -229,6 +232,7 @@ var editAction = A.one('html').hasClass('touch') ? 'click' : 'dblclick';
 var spreadSheet = new Liferay.RivetCollaborationSpreadSheet(
     {
         websocketAddress: '<%= websocketURL %>',
+        collaborationUserId: '<%= collaborationUserId %>',
         boundingBox: '#<portlet:namespace />dataTable',
         columns: columns,
         contentBox: '#<portlet:namespace />dataTableContent',

@@ -48,6 +48,7 @@ public class SpreadsheetEndpoint extends Endpoint {
 		Map<String, String[]> parameters = HttpUtil.getParameterMap(session.getQueryString());
 		// user parameters
 		String userId = parameters.get("userId")[0];
+		String collaborationUserId = parameters.get("collaborationUserId")[0];
 		String userImagePath = parameters.get("userImagePath")[0];
 		String guestLabel = parameters.get("guestLabel")[0];
 		String sheetId = parameters.get("sheetId")[0];
@@ -67,7 +68,7 @@ public class SpreadsheetEndpoint extends Endpoint {
 				userName = currentUser.getFullName();
 			}
 			LOG.debug(String.format("User full name: %s, User image path: %s", userName, userImagePath));
-			loggedUserMap.put(session.getId(), new UserData(userName, userImagePath, userId));
+			loggedUserMap.put(session.getId(), new UserData(userName, userImagePath, collaborationUserId));
 			sessions.put(session.getId(), session);
 			
 			/* adds message handler on current opened session */

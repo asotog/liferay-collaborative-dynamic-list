@@ -54,6 +54,9 @@ AUI.add(
                     },
                     websocketAddress: {
                     	value: ''
+                    },
+                    collaborationUserId: {
+                    	value: ''
                     }
                 },
                 
@@ -101,7 +104,7 @@ AUI.add(
                     _currentUserCellHighlighted: function(e) {
                         this.ws.send(A.JSON.stringify({
                             action:  RivetCollaborationSpreadSheet.CONSTANTS.CELL_HIGHLIGHTED,
-                            userId: Liferay.ThemeDisplay.getUserId(),
+                            userId: this.get('collaborationUserId'),
                             record: e.record,
                             column: e.col    
                         }));
@@ -115,7 +118,7 @@ AUI.add(
                     _currentUserCellValueUpdated: function(e) {
                         var data = {
                             action:  RivetCollaborationSpreadSheet.CONSTANTS.CELL_VALUE_UPDATED,
-                            userId: Liferay.ThemeDisplay.getUserId(),
+                            userId: this.get('collaborationUserId'),
                             value: e.value,
                             rawValue: e.rawValue,
                             record: e.record,
@@ -222,7 +225,7 @@ AUI.add(
                         A.Array.each(users, function(item, index) {
                             item.color = A.UsersColors.pickColor(item.userId);
                             // update highlight color for current user
-                            if (item.userId === Liferay.ThemeDisplay.getUserId()) {
+                            if (item.userId === instance.get('collaborationUserId')) {
                                 instance.set('highlightColor', item.color);
                             };
                             item.userName = (item.userName === 'rivetlogic.spreadsheet.guest.name.label') ? 'Guest' : item.userName;
@@ -238,7 +241,7 @@ AUI.add(
                     */
                     onCellHighlightMessage: function(data) {
                         var instance = this;
-                        if (Liferay.ThemeDisplay.getUserId() === data.userId) {
+                        if (this.get('collaborationUserId') === data.userId) {
                             return;
                         }
                         var cell = instance.getCellFromRecord(data);
@@ -256,7 +259,7 @@ AUI.add(
                     */
                     onRowsAddedMessage: function(data) {
                         var instance = this;
-                        if (Liferay.ThemeDisplay.getUserId() !== data.userId) {
+                        if (instance.get('collaborationUserId') !== data.userId) {
                             this.addEmptyRows(data.num);
                         }
                     },
@@ -266,7 +269,7 @@ AUI.add(
                     */
                     onLastRowDeletedMessage: function(data) {
                         var instance = this;
-                        if (Liferay.ThemeDisplay.getUserId() !== data.userId) {
+                        if (instance.get('collaborationUserId') !== data.userId) {
                             var currentSize = instance.get('data').size();
                             instance.get('data').remove(currentSize - 1);
                         }
@@ -279,7 +282,7 @@ AUI.add(
                     *
                     */
                     onCellValueUpdateMessage: function(data) {
-                        if (Liferay.ThemeDisplay.getUserId() === data.userId) {
+                        if (this.get('collaborationUserId') === data.userId) {
                             return;
                         }
                         var cell = this.getCellFromRecord(data);
@@ -324,7 +327,7 @@ AUI.add(
                         this.ws.send(A.JSON.stringify({
                             action: RivetCollaborationSpreadSheet.CONSTANTS.ROWS_ADDED,
                             num: num,
-                            userId: Liferay.ThemeDisplay.getUserId()
+                            userId: this.get('collaborationUserId')
                         }));
                     },
 
@@ -334,7 +337,7 @@ AUI.add(
                     removeLastRowAndBroadcast: function() {
                         this.ws.send(A.JSON.stringify({
                             action: RivetCollaborationSpreadSheet.CONSTANTS.LAST_ROW_DELETED,
-                            userId: Liferay.ThemeDisplay.getUserId()
+                            userId: this.get('collaborationUserId')
                         }));
                     },
                     
@@ -381,7 +384,7 @@ AUI.add(
                                 serviceContext: JSON.stringify(
                                     {
                                         scopeGroupId: themeDisplay.getScopeGroupId(),
-                                        userId: themeDisplay.getUserId()
+                                        userId: this.get('collaborationUserId')
                                     }
                                 )
                             },
