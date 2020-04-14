@@ -34,7 +34,7 @@
   background-clip: padding-box;
 }
 .realtime-spreadsheet table .cell-highlight {
-  box-shadow: 0px 1px 0px 1px #3FC51B;
+  box-shadow: 0px 0px 0px 1px #3FC51B;
   position: relative;
   z-index: 1;
 }
@@ -54,7 +54,7 @@
   z-index: 1;
 }
 .realtime-spreadsheet table .cell-highlight.current-user {
-  box-shadow: 0px 1px 0px 1px #009AE5;
+  box-shadow: 0px 0px 0px 1px #009AE5;
 }
 .realtime-spreadsheet table .table-highlight-overlay {
   display: none;

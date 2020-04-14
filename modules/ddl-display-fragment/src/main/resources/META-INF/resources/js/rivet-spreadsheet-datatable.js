@@ -3,7 +3,8 @@ AUI.add(
     function(A) {
         
         var HIGHLIGHTED_CELL = '.cell-highlight.current-user';
-        var BORDER_COLOR = 'box-shadow';
+        var BORDER_COLOR1 = 'border-color';
+        var BORDER_COLOR2 = 'box-shadow';
 
         var RivetSpreadSheet = A.Component.create({
             ATTRS: {
@@ -54,15 +55,21 @@ AUI.add(
                     // highlight
                     instance.delegate('click', function(e) {
                         var cellList = instance.get('boundingBox').all(HIGHLIGHTED_CELL);
-                        cellList.setStyle(BORDER_COLOR, '');
-                        cellList.removeClass('cell-highlight').removeClass('current-user');
                         cellList.each(function() {
-                            if (this.one('.cell-highlight-title')) {
-                                this.one('.cell-highlight-title').remove();
+                            this.removeClass('current-user');
+                            if (!this.hasAttribute('ref-class')) { // clean cell color if other user is not selecting same cell
+                                cellList.setStyle(BORDER_COLOR1, '');
+                                cellList.setStyle(BORDER_COLOR2, '');
+                                cellList.removeClass('cell-highlight');
+                                if (this.one('.cell-highlight-title')) {
+                                    this.one('.cell-highlight-title').remove();
+                                }
                             }
                         ;})
                         var cell = e.currentTarget;
-                        instance._updateHighlightCellColor(cell);
+                        if (!cell.hasAttribute('ref-class')) { // update cell color if other user not selecting same cell
+                            instance._updateHighlightCellColor(cell);
+                        }
                         instance._publishCellHighlight(cell);
                     }, '.' + instance.CLASS_NAMES_CELL_EDITOR_SUPPORT.cell, this);
                 },
@@ -128,11 +135,12 @@ AUI.add(
                 */
                 _updateHighlightCellColor: function(cell) {
                     cell.addClass('cell-highlight').addClass('current-user');
-                    cell.setStyle(BORDER_COLOR, this._getBoxShadow(this.get('highlightColor')));
+                    cell.setStyle(BORDER_COLOR1, this.get('highlightColor'));
+                    cell.setStyle(BORDER_COLOR2, this._getBoxShadow(this.get('highlightColor')));
                 },
 
                 _getBoxShadow: function (color) {
-                    return `0 1px 0 1px ${color}`;
+                    return `0 0 0 1px ${color}`;
                 },
                 
                 
@@ -147,7 +155,8 @@ AUI.add(
                         this.clearHighlightByCellRef(data.refClass);
                         data.cell.setAttribute('ref-class', data.refClass);
                         data.cell.addClass(data.refClass).addClass('cell-highlight');
-                        data.cell.setStyle(BORDER_COLOR, this._getBoxShadow(data.color));
+                        data.cell.setStyle(BORDER_COLOR1, data.color);
+                        data.cell.setStyle(BORDER_COLOR2, this._getBoxShadow(data.color));
                         data.cell.append('<span style="background-color: ' + data.color + 
                             ';" class="cell-highlight-title">' + data.title + '</span>')
                     }
@@ -163,7 +172,8 @@ AUI.add(
                         if (!this.hasClass('current-user')) {
                             this.removeClass('cell-highlight');
                         }
-                        this.setStyle(BORDER_COLOR, '');
+                        this.setStyle(BORDER_COLOR1, '');
+                        this.setStyle(BORDER_COLOR2, '');
                         if (this.one('.cell-highlight-title')) {
                             this.one('.cell-highlight-title').remove();
                         }
