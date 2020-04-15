@@ -153,6 +153,10 @@ AUI.add(
                 _updateTitledHighlightCellByClasses: function(data) {
                     if (data.cell) {
                         this.clearHighlightByCellRef(data.refClass);
+                        if (data.cell.getAttribute('ref-class')
+                            && data.refClass !== data.cell.getAttribute('ref-class')) {
+                            return;
+                        }
                         data.cell.setAttribute('ref-class', data.refClass);
                         data.cell.addClass(data.refClass).addClass('cell-highlight');
                         data.cell.setStyle(BORDER_COLOR1, data.color);
@@ -167,6 +171,10 @@ AUI.add(
                 */
                 clearHighlightByCellRef: function(cellRef) {
                     this.get('boundingBox').all('.' + cellRef).each(function() {
+                        if (this.getAttribute('ref-class')
+                            && cellRef !== this.getAttribute('ref-class')) {
+                            return;
+                        }
                         this.removeAttribute('ref-class');
                         this.removeClass(cellRef);
                         if (!this.hasClass('current-user')) {
