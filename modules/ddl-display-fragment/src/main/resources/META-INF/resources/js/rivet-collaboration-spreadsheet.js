@@ -192,7 +192,7 @@ AUI.add(
                                     instance.get('boundingBox').all('.cell-highlight:not(.current-user)').each(function(cell) {
                                         const isUserLogged = item.users.some(({ userId }) => cell.hasClass(`usercell-${userId}`));
                                         if (!isUserLogged) {
-                                            instance.clearHighlightByCellRef(cell.getAttribute('ref-class'));
+                                            instance.clearHighlightByCellRef(cell.getAttribute('current-ref-class'));
                                         }
                                     });
                                     break;
@@ -239,18 +239,34 @@ AUI.add(
                     * called when message arrives
                     *
                     */
-                    onCellHighlightMessage: function(data) {
+                    onCellHighlightMessage: function(collaborationData) {
                         var instance = this;
-                        if (this.get('collaborationUserId') === data.userId) {
+                        if (this.get('collaborationUserId') === collaborationData.userId) {
                             return;
                         }
-                        var cell = instance.getCellFromRecord(data);
-                        var user = instance.getUserFromOnlineList(data.userId);
-                        instance._updateTitledHighlightCellByClasses({
-                            title: user.userName,
-                            refClass: 'usercell-' + data.userId,
-                            cell: cell,
-                            color: A.UsersColors.pickColor(data.userId)
+                        const updateCell = (data, cellRef) => {
+                            var cell = cellRef || instance.getCellFromRecord(data);
+                            var user = instance.getUserFromOnlineList(data.userId);
+                            instance._updateTitledHighlightCellByClasses({
+                                title: user.userName,
+                                refClass: 'usercell-' + data.userId,
+                                cell: cell,
+                                refKey: 'userId',
+                                refValue: data.userId,
+                                color: A.UsersColors.pickColor(data.userId)
+                            });
+                        }
+
+                        updateCell(collaborationData);
+
+                        // verify if cell has to be highlighted with other user active in the same cell
+                        
+                        instance.get('boundingBox').all('td[refs]').each((cell) => {
+                            let refs = cell.getAttribute('refs');
+                            refs = refs ? refs.split(',') : [];
+                            if (refs.length > 0 && !cell.hasClass('cell-highlight')) {
+                                updateCell({ userId: refs[0] }, cell);
+                            }
                         });
                     },
                     

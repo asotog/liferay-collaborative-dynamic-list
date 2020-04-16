@@ -57,7 +57,7 @@ AUI.add(
                         var cellList = instance.get('boundingBox').all(HIGHLIGHTED_CELL);
                         cellList.each(function() {
                             this.removeClass('current-user');
-                            if (!this.hasAttribute('ref-class')) { // clean cell color if other user is not selecting same cell
+                            if (!this.hasAttribute('current-ref-class')) { // clean cell color if other user is not selecting same cell
                                 cellList.setStyle(BORDER_COLOR1, '');
                                 cellList.setStyle(BORDER_COLOR2, '');
                                 cellList.removeClass('cell-highlight');
@@ -67,7 +67,7 @@ AUI.add(
                             }
                         ;})
                         var cell = e.currentTarget;
-                        if (!cell.hasAttribute('ref-class')) { // update cell color if other user not selecting same cell
+                        if (!cell.hasAttribute('current-ref-class')) { // update cell color if other user not selecting same cell
                             instance._updateHighlightCellColor(cell);
                         }
                         instance._publishCellHighlight(cell);
@@ -152,12 +152,13 @@ AUI.add(
                 */
                 _updateTitledHighlightCellByClasses: function(data) {
                     if (data.cell) {
-                        this.clearHighlightByCellRef(data.refClass);
-                        if (data.cell.getAttribute('ref-class')
-                            && data.refClass !== data.cell.getAttribute('ref-class')) {
-                            return;
-                        }
-                        data.cell.setAttribute('ref-class', data.refClass);
+                        this.clearHighlightByCellRef(data);
+                        
+                        // if (data.cell.getAttribute('current-ref-class')
+                        //     && data.refClass !== data.cell.getAttribute('current-ref-class')) {
+                        //     return;
+                        // }
+                        this.addRef(data);
                         data.cell.addClass(data.refClass).addClass('cell-highlight');
                         data.cell.setStyle(BORDER_COLOR1, data.color);
                         data.cell.setStyle(BORDER_COLOR2, this._getBoxShadow(data.color));
@@ -166,25 +167,47 @@ AUI.add(
                     }
                 },
 
+                // keep track of users highlighting same cell
+                addRef: function({ cell, refClass, refValue }) {
+                   let refs = cell.getAttribute('refs');
+                   refs = refs ? refs.split(',') : [];
+                   refs.push(refValue);
+                   const distinct = (value, index, self) => self.indexOf(value) === index;
+                   cell.setAttribute('refs', refs.filter(distinct).join(','));
+                   cell.setAttribute('current-ref-class', refClass);
+                },
+
+                // remove highlight properly if multiple users highlighting same cell
+                deleteRef: function({ cell, refClass, refKey, refValue, color }) {
+                    // remove ref
+                    let refs = cell.getAttribute('refs');
+                    refs = refs ? refs.split(',') : [];
+                    refs = refs.filter(ref => ref != refValue);
+                    cell.setAttribute('refs', refs.join(','));
+                    // update ui
+                    cell.removeAttribute('current-ref-class');
+                    cell.removeClass(refClass);
+                    if (!cell.hasClass('current-user')) {
+                        cell.removeClass('cell-highlight');
+                    }
+                    cell.setStyle(BORDER_COLOR1, '');
+                    cell.setStyle(BORDER_COLOR2, '');
+                    if (cell.one('.cell-highlight-title')) {
+                        cell.one('.cell-highlight-title').remove();
+                    }
+                },
+
                 /*
                 * Removes cell highlight by given class
                 */
-                clearHighlightByCellRef: function(cellRef) {
-                    this.get('boundingBox').all('.' + cellRef).each(function() {
-                        if (this.getAttribute('ref-class')
-                            && cellRef !== this.getAttribute('ref-class')) {
+                clearHighlightByCellRef: function({ refClass, refKey, refValue }) {
+                    const instance = this;
+                    this.get('boundingBox').all('.' + refClass).each(function() {
+                        if (this.getAttribute('current-ref-class')
+                            && refClass !== this.getAttribute('current-ref-class')) {
                             return;
                         }
-                        this.removeAttribute('ref-class');
-                        this.removeClass(cellRef);
-                        if (!this.hasClass('current-user')) {
-                            this.removeClass('cell-highlight');
-                        }
-                        this.setStyle(BORDER_COLOR1, '');
-                        this.setStyle(BORDER_COLOR2, '');
-                        if (this.one('.cell-highlight-title')) {
-                            this.one('.cell-highlight-title').remove();
-                        }
+                        instance.deleteRef({ cell: this, refClass, refKey, refValue })
                     });
                 }
             }
