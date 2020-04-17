@@ -120,11 +120,23 @@ AUI.add(
         Liferay.RivetInlineCellEditor = InlineCellEditor;
     
         Liferay.RivetInlineCellEditor.setCellValue = function(cell, value) {
-            if (!cell.one('span.value')) {
+            let title = '';
+            if (cell.one('.cell-highlight-title')) { // keep cell title (active username highlighting cell) if it has one
+                title = cell.one('.cell-highlight-title').get('outerHTML');
+            }
+            if (!cell.one('span.value')) { // clean cell
                 cell.empty();
+                cell.append(title);
                 cell.append('<span class="value"></span>');
             }
             cell.one('span.value').set('text', value);
+            if (title) { // hack to wait for record to be updated, it overwrites cell so need to 
+                window.setTimeout(() => {
+                    if (!cell.one('.cell-highlight-title')) {
+                        cell.append(title);
+                    }
+                }, 50);
+            }
         };
 
         Liferay.RivetInlineCellEditor.getCellValue = function(cell) {
