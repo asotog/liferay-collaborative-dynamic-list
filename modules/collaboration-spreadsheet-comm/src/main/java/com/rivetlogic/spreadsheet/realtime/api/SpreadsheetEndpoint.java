@@ -87,6 +87,8 @@ public class SpreadsheetEndpoint extends Endpoint {
 	private void onMessageHandler(String text, String sheetId) {
 		ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap(sheetId);
 		ConcurrentMap<String, Session> sessions = this.getSessions(sheetId);
+		ConcurrentMap<String, JSONObject> highlightedCellsByUsers = this.getHighlightedCellsByUsers(sheetId);
+
 		try {
 			JSONObject jsonMessage = JSONFactoryUtil.createJSONObject(text);
 			
@@ -94,12 +96,14 @@ public class SpreadsheetEndpoint extends Endpoint {
 			if (SpreadsheetUtil.LOGIN.equals(jsonMessage
 					.getString(SpreadsheetUtil.ACTION))) {
 				JSONObject usersLoggedMessage = SpreadsheetUtil
-						.generateLoggedUsersJSON(loggedUserMap);
+						.generateLoggedUsersJSON(loggedUserMap, highlightedCellsByUsers);
 				this.broadcast(usersLoggedMessage.toString(), sessions);
 			} else if (SpreadsheetUtil.CELL_HIGHLIGHTED
 					.equals(jsonMessage
-							.getString(SpreadsheetUtil.ACTION))) { // may be we can remove this as below code is funcioning same.
+							.getString(SpreadsheetUtil.ACTION))) { // may be we can remove this as below code is functioning same.
 				/* just broadcast the message */
+				highlightedCellsByUsers.put(jsonMessage.getString(SpreadsheetUtil.USER_ID), jsonMessage);
+				LOG.debug(highlightedCellsByUsers);
 				this.broadcast(SpreadsheetUtil.generateCommands(jsonMessage).toString(), sessions);
 			} else if (SpreadsheetUtil.CELL_VALUE_UPDATED
 					.equals(jsonMessage
@@ -135,13 +139,16 @@ public class SpreadsheetEndpoint extends Endpoint {
 		// user parameters
 		String sheetId = parameters.get("sheetId")[0];
 		ConcurrentMap<String, UserData> loggedUserMap = this.getLoggedUsersMap(sheetId);
+		ConcurrentMap<String, JSONObject> highlightedCellsByUsers = this.getHighlightedCellsByUsers(sheetId);
 		ConcurrentMap<String, Session> sessions = this.getSessions(sheetId);
 		
+		UserData loggedOutUser = loggedUserMap.get(session.getId());
 		loggedUserMap.remove(session.getId());
+		highlightedCellsByUsers.remove(loggedOutUser.getUserId());
 		sessions.remove(session.getId());
 		
 		JSONObject usersLoggedMessage = SpreadsheetUtil
-				.generateLoggedUsersJSON(loggedUserMap);
+				.generateLoggedUsersJSON(loggedUserMap, highlightedCellsByUsers);
 		this.broadcast(usersLoggedMessage.toString(), sessions);
 	}
 	
@@ -172,6 +179,35 @@ public class SpreadsheetEndpoint extends Endpoint {
 					loggedUserMap);
 		}
 		return loggedUserMap;
+	}
+
+	/**
+	 * Get highlighted cells, new users after page loads can see what other users previously joined are interacting
+	 * @param sheetId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private ConcurrentMap<String, JSONObject> getHighlightedCellsByUsers(String sheetId) {
+		Object sheet = portalCache
+				.get(SpreadsheetUtil.HIGHLIGHT_CELLS_SHEET_MAP_KEY);
+		
+		ConcurrentMap<String, ConcurrentMap<String, JSONObject>> sheetHighlightedCellsMap = (ConcurrentMap<String, ConcurrentMap<String, JSONObject>>) sheet;
+		if (null == sheetHighlightedCellsMap) {
+			sheetHighlightedCellsMap = new ConcurrentSkipListMap<String, ConcurrentMap<String, JSONObject>>();
+			portalCache.put(SpreadsheetUtil.HIGHLIGHT_CELLS_SHEET_MAP_KEY,
+			sheetHighlightedCellsMap);
+		}
+		
+		
+		ConcurrentMap<String, JSONObject> object = sheetHighlightedCellsMap.get(sheetId); 
+		
+		ConcurrentMap<String, JSONObject> highlightedCellsMap = (ConcurrentMap<String, JSONObject>) object;
+		if (null == highlightedCellsMap) {
+			highlightedCellsMap = new ConcurrentSkipListMap<String, JSONObject>();
+			sheetHighlightedCellsMap.put(sheetId,
+				highlightedCellsMap);
+		}
+		return highlightedCellsMap;
 	}
 	
 	/**

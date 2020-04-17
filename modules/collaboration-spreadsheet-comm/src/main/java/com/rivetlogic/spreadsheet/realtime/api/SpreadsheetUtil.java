@@ -18,6 +18,7 @@ public class SpreadsheetUtil {
 	public static final String GUEST_USER_NAME_LABEL = "rivetlogic.spreadsheet.guest.name.label";
 	public static final String LOGGED_USERS_MAP_KEY = "rivetlogic.spreadsheet.logged.users.map";
 	public static final String SHEET_MAP_KEY = "rivetlogic.spreadsheet.sheet.map";
+	public static final String HIGHLIGHT_CELLS_SHEET_MAP_KEY = "rivetlogic.spreadsheet.highlighted.sheet.map";
 	public static final String SHEET_SESSIONS_KEY = "rivetlogic.spreadsheet.sheet.sessions";
 	/* ACTIONS */
 	public static final String LOGIN = "login";
@@ -28,6 +29,7 @@ public class SpreadsheetUtil {
 
 	/* JSON PROPERTIES */
 	public static final String USERS = "users";
+	public static final String HIGHLIGHTED_CELLS = "highlightedCells";
 	public static final String UNLOGGED_USER = "unloggedUser";
 	public static final String USER_ID = "userId";
 	public static final String TYPE = "type";
@@ -46,11 +48,13 @@ public class SpreadsheetUtil {
 	 * @param loggedUserMap
 	 * @return
 	 */
-	public static JSONObject generateLoggedUsersJSON(ConcurrentMap<String, UserData> loggedUserMap) {
+	public static JSONObject generateLoggedUsersJSON(ConcurrentMap<String, UserData> loggedUserMap,
+		ConcurrentMap<String, JSONObject> highlightedCellsByUsers) {
 		JSONObject usersLogged = JSONFactoryUtil.createJSONObject();
 		JSONObject usersUpdateCommand = JSONFactoryUtil.createJSONObject();
 		JSONArray commands = JSONFactoryUtil.createJSONArray();
 		JSONArray users = JSONFactoryUtil.createJSONArray();
+		JSONArray highlightedCells = JSONFactoryUtil.createJSONArray();
 
 		usersUpdateCommand.put(ACTION, USERS);
 
@@ -68,6 +72,13 @@ public class SpreadsheetUtil {
 
 		usersUpdateCommand.put(USERS, users);
 
+		for (Entry<String, JSONObject> entry : highlightedCellsByUsers.entrySet()) {
+			JSONObject highlightedCell = entry.getValue();
+			highlightedCells.put(highlightedCell);
+		}
+
+		usersUpdateCommand.put(HIGHLIGHTED_CELLS, highlightedCells);
+
 		/* add to commands */
 		commands.put(usersUpdateCommand);
 
@@ -78,33 +89,6 @@ public class SpreadsheetUtil {
 
 		return usersLogged;
 
-	}
-
-	/**
-	 * Generates json object from regular logged users list but adding an
-	 * unlogged user when gets disconnected
-	 * 
-	 * @param loggedUserMap
-	 * @param unloggedUserData
-	 * @return
-	 */
-	public static JSONObject generateLoggedAndUnloggedUsersJSON(ConcurrentMap<String, UserData> loggedUserMap,
-			UserData unloggedUserData) {
-		JSONObject usersJSON = SpreadsheetUtil.generateLoggedUsersJSON(loggedUserMap);
-		JSONObject usersUpdateCommand = usersJSON.getJSONArray(COMMANDS).getJSONObject(0);
-
-		if (unloggedUserData != null) { // as this has been updated to avoid NPE
-			JSONObject unloggedUser = JSONFactoryUtil.createJSONObject();
-			LOG.debug(unloggedUser);
-			unloggedUser.put(USERNAME, unloggedUserData.getUserName());
-			unloggedUser.put(USER_IMAGEPATH, unloggedUserData.getUserImagePath());
-			unloggedUser.put(USER_ID, unloggedUserData.getUserId());
-			unloggedUser.put(SESSIONID, "");
-
-			usersUpdateCommand.put(UNLOGGED_USER, unloggedUser);
-		}
-
-		return usersJSON;
 	}
 
 	public static JSONObject generateCommands(JSONObject newCommand) {

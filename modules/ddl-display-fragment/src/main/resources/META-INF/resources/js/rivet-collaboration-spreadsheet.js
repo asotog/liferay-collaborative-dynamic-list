@@ -4,7 +4,8 @@ AUI.add(
         window.RivetCollaborationSpreadSheetGlobal = window.RivetCollaborationSpreadSheetGlobal || {};
     
     	var Lang = A.Lang;
-    	var INVALID = A.Attribute.INVALID_VALUE;
+        var INVALID = A.Attribute.INVALID_VALUE;
+        var JOINING = 'joining';
     	var isArray = Lang.isArray;
         
     	var modelClientId = 0;
@@ -57,7 +58,10 @@ AUI.add(
                     },
                     collaborationUserId: {
                     	value: ''
-                    }
+                    },
+                    joining: {
+                        value: true
+                    },
                 },
                 
                 CSS_PREFIX: 'table',
@@ -190,11 +194,27 @@ AUI.add(
                                 case RivetCollaborationSpreadSheet.CONSTANTS.USERS:
                                     instance.onUsersMessage(item.users);
                                     instance.get('boundingBox').all('.cell-highlight:not(.current-user)').each(function(cell) {
-                                        const isUserLogged = item.users.some(({ userId }) => cell.hasClass(`usercell-${userId}`));
+                                        const isUserLogged = item.users.find(({ userId }) => cell.hasClass(`usercell-${userId}`));
                                         if (!isUserLogged) {
-                                            instance.clearHighlightByCellRef(cell.getAttribute('current-ref-class'));
+                                            instance.clearHighlightByCellRef({
+                                                refClass: cell.getAttribute('current-ref-class'),
+                                                refKey: 'userId',
+                                                refValue: cell.getAttribute('current-ref-class').replace('usercell-', '')
+                                            });
                                         }
                                     });
+                                    if (instance.get(JOINING)) {
+                                        if (item.highlightedCells
+                                            && Array.isArray(item.highlightedCells)) {
+                                            
+                                            item.highlightedCells.forEach(cellItem => {
+                                                if (item.users.some(({ userId}) => userId === cellItem.userId)) { // if user not logged or logged out users cached ignore highlight
+                                                    instance.onCellHighlightMessage(cellItem);
+                                                }
+                                            });
+                                        }
+                                        instance.set(JOINING, false);
+                                    }
                                     break;
                                 case RivetCollaborationSpreadSheet.CONSTANTS.CELL_HIGHLIGHTED:
                                     instance.onCellHighlightMessage(item);
